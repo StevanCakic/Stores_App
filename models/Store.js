@@ -57,4 +57,14 @@ storeSchema.pre("save", async function(next) {
   next();
 });
 
+// we dont use arrow function in this case because we need to access
+// our model Store which is "this" if we dont use arrow function
+storeSchema.statics.getTagsList = function() {
+  return this.aggregate([
+    { $unwind: "$tags" },
+    { $group: { _id: "$tags", count: { $sum: 1 } } },
+    { $sort: { count: -1 } }
+  ]);
+};
+
 module.exports = mongoose.model("Store", storeSchema);
