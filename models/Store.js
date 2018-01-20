@@ -34,10 +34,15 @@ const storeSchema = new mongoose.Schema({
       required: "You must supply an adress"
     }
   },
-  photo: String
+  photo: String,
+  author: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: "You must supply an author"
+  }
 });
 
-storeSchema.pre("save", async function(next) {
+storeSchema.pre("save", async function (next) {
   //this is instance of storeSchema
   if (!this.isModified("name")) {
     next();
@@ -59,7 +64,7 @@ storeSchema.pre("save", async function(next) {
 
 // we dont use arrow function in this case because we need to access
 // our model Store which is "this" if we dont use arrow function
-storeSchema.statics.getTagsList = function() {
+storeSchema.statics.getTagsList = function () {
   return this.aggregate([
     { $unwind: "$tags" },
     { $group: { _id: "$tags", count: { $sum: 1 } } },
