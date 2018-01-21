@@ -42,6 +42,12 @@ const storeSchema = new mongoose.Schema({
   }
 });
 
+//Define index
+storeSchema.index({
+  name: 'text',
+  description: 'text'
+})
+
 storeSchema.pre("save", async function (next) {
   //this is instance of storeSchema
   if (!this.isModified("name")) {
