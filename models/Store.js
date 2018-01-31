@@ -37,18 +37,20 @@ const storeSchema = new mongoose.Schema({
   photo: String,
   author: {
     type: mongoose.Schema.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: "You must supply an author"
   }
 });
 
 //Define index
 storeSchema.index({
-  name: 'text',
-  description: 'text'
-})
+  name: "text",
+  description: "text"
+});
 
-storeSchema.pre("save", async function (next) {
+storeSchema.index({ location: "2dsphere" });
+
+storeSchema.pre("save", async function(next) {
   //this is instance of storeSchema
   if (!this.isModified("name")) {
     next();
@@ -70,7 +72,7 @@ storeSchema.pre("save", async function (next) {
 
 // we dont use arrow function in this case because we need to access
 // our model Store which is "this" if we dont use arrow function
-storeSchema.statics.getTagsList = function () {
+storeSchema.statics.getTagsList = function() {
   return this.aggregate([
     { $unwind: "$tags" },
     { $group: { _id: "$tags", count: { $sum: 1 } } },

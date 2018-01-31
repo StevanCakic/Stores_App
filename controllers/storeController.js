@@ -61,7 +61,7 @@ const confirmOwner = (store, user) => {
   if (!store.author.equals(user._id)) {
     throw Error("You must own a store in order to edit it!");
   }
-}
+};
 
 exports.editStore = async (req, res) => {
   const store = await Store.findOne({ _id: req.params.id });
@@ -84,7 +84,9 @@ exports.updateStore = async (req, res) => {
 };
 
 exports.getStoreBySlug = async (req, res, next) => {
-  const store = await Store.findOne({ slug: req.params.slug }).populate('author');
+  const store = await Store.findOne({ slug: req.params.slug }).populate(
+    "author"
+  );
   if (!store) {
     next();
     return;
@@ -94,7 +96,7 @@ exports.getStoreBySlug = async (req, res, next) => {
 
 exports.getStoresByTag = async (req, res) => {
   const tag = req.params.tag;
-  const tagQuery = tag || { $exists: true };// if tag is empty, return all result
+  const tagQuery = tag || { $exists: true }; // if tag is empty, return all result
 
   const tagsPromise = Store.getTagsList();
   const storesPromise = Store.find({ tags: tagQuery });
@@ -104,16 +106,36 @@ exports.getStoresByTag = async (req, res) => {
 };
 
 exports.searchStores = async (req, res) => {
-  const stores = await Store.find({
-    $text: {
-      $search: req.query.q
+  const stores = await Store.find(
+    {
+      $text: {
+        $search: req.query.q
+      }
+    },
+    {
+      score: { $meta: "textScore" }
     }
-  }, {
-    score: { $meta: 'textScore' }
-  })
-  .sort({
-    score: { $meta: 'textScore' }
-  })
-  .limit(5);
+  )
+    .sort({
+      score: { $meta: "textScore" }
+    })
+    .limit(5);
   res.json(stores);
-}
+};
+
+exports.mapStores = async (req, res) => {
+  const coords = [req.query.lng, req.query.lat].map(parseFloat);
+  const q = {
+    location: {
+      $nearSphere: {
+        $geometry: {
+          type: "Point",
+          coordinates: coords
+        },
+        $maxDistance: 10000
+      }
+    }
+  };
+  const stores = await Store.find(q).select('slug name description location').limit(10);
+  res.json(stores);
+};
