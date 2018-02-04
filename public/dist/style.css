@@ -921,6 +921,7 @@ label {
   .heart__button--hearted svg {
     fill: red; }
   .heart__button--float:after {
+    color: red;
     animation: fly 2.5s 1 ease-out; }
 
 @keyframes fly {

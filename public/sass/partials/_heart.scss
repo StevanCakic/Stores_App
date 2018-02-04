@@ -22,6 +22,7 @@
     }
     &--float {
       &:after {
+        color: red;
         animation: fly 2.5s 1 ease-out;
       }
     }
